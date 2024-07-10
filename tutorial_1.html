@@ -175,14 +175,10 @@
               store.properties.id = i;
             });
             map.on('load', () => {
-              map.addLayer({
-                id: 'locations',
-                type: 'circle',
-                source: {
+                map.addSource('places', {
                   type: 'geojson',
                   data: stores
-                }
-              });
+                });
               buildLocationList(stores);
             });
           });
