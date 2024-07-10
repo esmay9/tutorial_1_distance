@@ -108,12 +108,50 @@
           background: #00853e;
           border-radius: 0;
         }
+    /* Marker tweaks */
+.mapboxgl-popup-close-button {
+  display: none;
+}
+
+.mapboxgl-popup-content {
+  font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', sans-serif;
+  padding: 0;
+  width: 180px;
+}
+
+.mapboxgl-popup-content h3 {
+  background: #91c949;
+  color: #fff;
+  margin: 0;
+  padding: 10px;
+  border-radius: 3px 3px 0 0;
+  font-weight: 700;
+  margin-top: -15px;
+}
+
+.mapboxgl-popup-content h4 {
+  margin: 0;
+  padding: 10px;
+  font-weight: 400;
+}
+
+.mapboxgl-popup-content div {
+  padding: 10px;
+}
+
+.mapboxgl-popup-anchor-top > .mapboxgl-popup-content {
+  margin-top: 15px;
+}
+
+.mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
+  border-bottom-color: #91c949;
+}
     </style>
 </head>
 <body>
     <div class="sidebar">
         <div class="heading">
-          <h1>Santa Lucia Supermaket Locations</h1>
+          <h1>Santa Lucia Supermarket Locations</h1>
         </div>
         <div id="listings" class="listings"></div>
     </div>
@@ -149,7 +187,27 @@
             });
           });
 
-       function buildLocationList(stores) {
+        map.on('click', (event) => {
+          const features = map.queryRenderedFeatures(event.point, {
+            layers: ['locations']
+          });
+
+          if (!features.length) return;
+
+          const clickedPoint = features[0];
+
+          flyToStore(clickedPoint);
+          createPopUp(clickedPoint);
+
+          const activeItem = document.getElementsByClassName('active');
+          if (activeItem[0]) {
+            activeItem[0].classList.remove('active');
+          }
+          const listing = document.getElementById(`listing-${clickedPoint.properties.id}`);
+          listing.classList.add('active');
+        });
+
+        function buildLocationList(stores) {
           for (const store of stores.features) {
             const listings = document.getElementById('listings');
             const listing = listings.appendChild(document.createElement('div'));
@@ -164,7 +222,37 @@
 
             const details = listing.appendChild(document.createElement('div'));
             details.innerHTML = `Location: ${store.properties.Location}`;
+
+            link.addEventListener('click', function (e) {
+              e.preventDefault();
+              const clickedListing = stores.features.find(store => store.properties.id === parseInt(this.id.split('-')[1]));
+              flyToStore(clickedListing);
+              createPopUp(clickedListing);
+
+              const activeItem = document.getElementsByClassName('active');
+              if (activeItem[0]) {
+                activeItem[0].classList.remove('active');
+              }
+              this.parentNode.classList.add('active');
+            });
           }
+        }
+
+        function flyToStore(currentFeature) {
+          map.flyTo({
+            center: currentFeature.geometry.coordinates,
+            zoom: 15
+          });
+        }
+
+        function createPopUp(currentFeature) {
+          const popUps = document.getElementsByClassName('mapboxgl-popup');
+          if (popUps[0]) popUps[0].remove();
+
+          new mapboxgl.Popup({ closeOnClick: false })
+            .setLngLat(currentFeature.geometry.coordinates)
+            .setHTML(`<h3>Santa Lucia</h3><h4>${currentFeature.properties.Location}</h4>`)
+            .addTo(map);
         }
     </script>
 </body>
