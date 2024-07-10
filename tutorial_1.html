@@ -203,7 +203,7 @@
             scrollZoom: false
         });
 
-        fetch('santa_lucia_yaounde.geojson')
+        fetch('santa_lucia_cameroon.geojson')
             .then(response => response.json())
             .then(data => {
                 const stores = data;
@@ -263,7 +263,10 @@
                 link.href = '#';
                 link.className = 'title';
                 link.id = `link-${store.properties.id}`;
-                link.innerHTML = `${store.properties.Location}`;
+                link.innerHTML = `${store.properties.location}`;
+
+                const details = listing.appendChild(document.createElement('div'));
+                details.innerHTML = `${store.properties.city}`;
 
                 link.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -283,7 +286,7 @@
         function flyToStore(currentFeature) {
             map.flyTo({
                 center: currentFeature.geometry.coordinates,
-                zoom: 15
+                zoom: 17
             });
         }
 
@@ -293,7 +296,7 @@
 
             new mapboxgl.Popup({ closeOnClick: false })
                 .setLngLat(currentFeature.geometry.coordinates)
-                .setHTML(`<h4>${currentFeature.properties.Location}</h4>`)
+                .setHTML(`<h3>${currentFeature.properties.location}</h3><h4>${currentFeature.properties.city}</h4>`)
                 .addTo(map);
         }
     </script>
