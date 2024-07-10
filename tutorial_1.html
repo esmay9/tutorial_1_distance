@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <title>Santa Lucia Supermarket Locations</title>
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
     <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
-    {/* Geocoder plugin */}
+    <!-- Geocoder plugin -->
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1-dev/mapbox-gl-geocoder.min.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1-dev/mapbox-gl-geocoder.css"
-      type="text/css"
-    />
-    {/* Turf.js plugin */}
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1-dev/mapbox-gl-geocoder.css" type="text/css">
+    <!-- Turf.js plugin -->
     <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
     <style>
         * {
@@ -49,7 +47,7 @@
             top: 0;
             left: 0;
             overflow: hidden;
-            border-right: 1px solid rgb(0 0 0 / 25%);
+            border-right: 1px solid rgba(0, 0, 0, 0.25);
         }
 
         .map {
@@ -107,7 +105,7 @@
             width: 3px;
             height: 3px;
             border-left: 0;
-            background: rgba(0 0 0 0.1);
+            background: rgba(0, 0, 0, 0.1);
         }
 
         ::-webkit-scrollbar-track {
@@ -130,7 +128,7 @@
         }
 
         .mapboxgl-popup-content h3 {
-            background: #91c949;
+            background: #e75480;
             color: #fff;
             margin: 0;
             padding: 10px;
@@ -169,19 +167,20 @@
         .mapboxgl-popup {
             padding-bottom: 50px;
         }
-        .mapboxgl-ctrl-geocoder {
-  border: 0;
-  border-radius: 0;
-  position: relative;
-  top: 0;
-  width: 800px;
-  margin-top: 0;
-}
 
-.mapboxgl-ctrl-geocoder > div {
-  min-width: 100%;
-  margin-left: 0;
-}
+        .mapboxgl-ctrl-geocoder {
+            border: 0;
+            border-radius: 0;
+            position: relative;
+            top: 0;
+            width: 800px;
+            margin-top: 0;
+        }
+
+        .mapboxgl-ctrl-geocoder > div {
+            min-width: 100%;
+            margin-left: 0;
+        }
     </style>
 </head>
 <body>
@@ -215,11 +214,47 @@
                         type: 'geojson',
                         data: stores
                     });
+
                     const geocoder = new MapboxGeocoder({
-                      accessToken: mapboxgl.accessToken, // Set the access token
-                      mapboxgl: mapboxgl, // Set the mapbox-gl instance
-                      marker: true, // Use the geocoder's default marker style
-                      bbox:  [11.4333, 3.7167, 11.6333, 3.9167] // Coordinates for Yaoundé.
+                        accessToken: mapboxgl.accessToken, // Set the access token
+                        mapboxgl: mapboxgl, // Set the mapbox-gl instance
+                        marker: true, // Use the geocoder's default marker style
+                        bbox: [11.4333, 3.7167, 11.6333, 3.9167] // Coordinates for Yaoundé
+                    });
+
+                    geocoder.on('result', (event) => {
+                        const searchResult = event.result.geometry;
+                        const options = { units: 'miles' };
+
+                        for (const store of stores.features) {
+                            store.properties.distance = turf.distance(
+                                searchResult,
+                                store.geometry,
+                                options
+                            );
+                        }
+
+                        stores.features.sort((a, b) => {
+                            if (a.properties.distance > b.properties.distance) {
+                                return 1;
+                            } else if (a.properties.distance < b.properties.distance) {
+                                return -1;
+                            } else {
+                                return 0;
+                            }
+                        });
+
+                        const listings = document.getElementById('listings');
+                        while (listings.firstChild) {
+                            listings.removeChild(listings.firstChild);
+                        }
+
+                        buildLocationList(stores);
+
+                        const activeListing = document.getElementById(`listing-${stores.features[0].properties.id}`);
+                        if (activeListing) {
+                            activeListing.classList.add('active');
+                        }
                     });
 
                     map.addControl(geocoder, 'top-left');
@@ -242,12 +277,14 @@
                     flyToStore(marker);
                     createPopUp(marker);
                     const activeItem = document.getElementsByClassName('active');
-                    e.stopPropagation();
                     if (activeItem[0]) {
                         activeItem[0].classList.remove('active');
                     }
                     const listing = document.getElementById(`listing-${marker.properties.id}`);
-                    listing.classList.add('active');
+                    if (listing) {
+                        listing.classList.add('active');
+                    }
+                    e.stopPropagation();
                 });
             }
         }
@@ -267,18 +304,23 @@
 
                 const details = listing.appendChild(document.createElement('div'));
                 details.innerHTML = `${store.properties.city}`;
+                if (store.properties.distance) {
+                    const roundedDistance = Math.round(store.properties.distance * 100) / 100;
+                    details.innerHTML += `<div><strong>${roundedDistance} miles away</strong></div>`;
+                }
 
                 link.addEventListener('click', function (e) {
                     e.preventDefault();
-                    const clickedListing = stores.features.find(store => store.properties.id === parseInt(this.id.split('-')[1]));
-                    flyToStore(clickedListing);
-                    createPopUp(clickedListing);
-
-                    const activeItem = document.getElementsByClassName('active');
-                    if (activeItem[0]) {
-                        activeItem[0].classList.remove('active');
+                    const clickedListing = stores.features.find(store => store.properties.id === parseInt(this.id.split('-')[1], 10));
+                    if (clickedListing) {
+                        flyToStore(clickedListing);
+                        createPopUp(clickedListing);
+                        const activeItem = document.getElementsByClassName('active');
+                        if (activeItem[0]) {
+                            activeItem[0].classList.remove('active');
+                        }
+                        this.parentNode.classList.add('active');
                     }
-                    this.parentNode.classList.add('active');
                 });
             }
         }
