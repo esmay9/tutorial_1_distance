@@ -114,7 +114,6 @@
     <div class="sidebar">
         <div class="heading">
           <h1>Santa Lucia Supermaket Locations</h1>
-          <h3>Yaoundé, Cameroon</h3>
         </div>
         <div id="listings" class="listings"></div>
     </div>
@@ -124,7 +123,7 @@
       
         const map = new mapboxgl.Map({
           container: 'map',
-          style: 'mapbox://styles/mapbox/light-v11',
+          style: 'mapbox://styles/mapbox/satellite-streets-v12',
           center: [11.5202, 3.8617],
           zoom: 11,
           scrollZoom: false
@@ -149,6 +148,7 @@
               buildLocationList(stores);
             });
           });
+
         function buildLocationList(stores) {
           for (const store of stores.features) {
             const listings = document.getElementById('listings');
@@ -160,8 +160,12 @@
             link.href = '#';
             link.className = 'title';
             link.id = `link-${store.properties.id}`;
-            }
+            link.innerHTML = `Store ID: ${store.properties.id}`;
+
+            const details = listing.appendChild(document.createElement('div'));
+            details.innerHTML = `Location: ${store.properties.location}`;
           }
+        }
     </script>
 </body>
 </html>
