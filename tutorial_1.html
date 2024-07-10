@@ -3,6 +3,15 @@
 <head>
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
     <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+    {/* Geocoder plugin */}
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1-dev/mapbox-gl-geocoder.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1-dev/mapbox-gl-geocoder.css"
+      type="text/css"
+    />
+    {/* Turf.js plugin */}
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -160,6 +169,19 @@
         .mapboxgl-popup {
             padding-bottom: 50px;
         }
+        .mapboxgl-ctrl-geocoder {
+  border: 0;
+  border-radius: 0;
+  position: relative;
+  top: 0;
+  width: 800px;
+  margin-top: 0;
+}
+
+.mapboxgl-ctrl-geocoder > div {
+  min-width: 100%;
+  margin-left: 0;
+}
     </style>
 </head>
 <body>
@@ -193,6 +215,14 @@
                         type: 'geojson',
                         data: stores
                     });
+                    const geocoder = new MapboxGeocoder({
+                      accessToken: mapboxgl.accessToken, // Set the access token
+                      mapboxgl: mapboxgl, // Set the mapbox-gl instance
+                      marker: true, // Use the geocoder's default marker style
+                      bbox:  [11.4333, 3.7167, 11.6333, 3.9167] // Coordinates for Yaoundé.
+                    });
+
+                    map.addControl(geocoder, 'top-left');
                     addMarkers(stores);
                     buildLocationList(stores);
                 });
