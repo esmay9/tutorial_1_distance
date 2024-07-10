@@ -218,10 +218,7 @@
             link.href = '#';
             link.className = 'title';
             link.id = `link-${store.properties.id}`;
-            link.innerHTML = `Store ID: ${store.properties.id}`;
-
-            const details = listing.appendChild(document.createElement('div'));
-            details.innerHTML = `Location: ${store.properties.Location}`;
+            link.innerHTML = `${store.properties.Location}`;
 
             link.addEventListener('click', function (e) {
               e.preventDefault();
@@ -251,7 +248,7 @@
 
           new mapboxgl.Popup({ closeOnClick: false })
             .setLngLat(currentFeature.geometry.coordinates)
-            .setHTML(`<h3>Santa Lucia</h3><h4>${currentFeature.properties.Location}</h4>`)
+            .setHTML(`<h4>${currentFeature.properties.Location}</h4>`)
             .addTo(map);
         }
     </script>
