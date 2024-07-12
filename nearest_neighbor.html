@@ -1,136 +1,104 @@
-<!doctype html>
+<!DOCTYPE HTML>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
     <title>Cameroon Yaoundé Mission Apartments and Church Buildings</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
-    <link
-      href="https://api.tiles.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css"
-      rel="stylesheet"
-    />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://api.mapbox.com/mapbox.js/plugins/turf/v3.0.11/turf.min.js"></script>
-<style>
-    body {
-  margin: 0;
-  padding: 0;
-}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
 
-#map {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-}
-</style>
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
     <div id="map"></div>
     <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZXNtYXktOSIsImEiOiJjbHloeGZlYzQwNG9lMmpxMnRoOWpwczRpIn0.8bV8H4pVxNbjvPvkcmNfjQ ';
-    const map = new mapboxgl.Map({
-        container: 'map', // container id
-        style: 'mapbox://styles/mapbox/satellite-streets-v12', // stylesheet location
-        center: [12.0, 6.0], // starting position
-        zoom: 5 // starting zoom
-    });
-
-    const apartments = {
-        "type": "FeatureCollection",
-        "features": [
-            {"type": "Feature","properties":{"name":"Eleveur Apartment","id":1,"city":"Yaoundé"},"geometry":{"coordinates":[11.542880256254165,3.907677715435071],"type":"Point"}},
-            {"type": "Feature","properties":{"name":"Meumi Palace Apartment","id":2,"city":"Yaoundé"},"geometry":{"coordinates":[11.51278450044532,3.8923461973159306],"type":"Point"}},
-            {"type": "Feature","properties":{"name":"Ngwele Apartment","id":3,"city":"Douala"},"geometry":{"coordinates":[9.645183078631248,4.08603976897885],"type":"Point"}},
-            {"type": "Feature","properties":{"name":"Village Apartment","id":4,"city":"Douala"},"geometry":{"coordinates":[9.766978217494483,3.999987003572002],"type":"Point"}},
-            {"type": "Feature","properties":{"name":"Bonapriso Apartment","id":5,"city":"Douala"},"geometry":{"coordinates":[9.702069391632165,4.018090811910795],"type":"Point"}}
-        ]
-    };
-
-    const church_builds = {
-        "type": "FeatureCollection",
-        "features": [
-            {"type":"Feature","properties":{"id":1,"name":"Bastos Branch","city":"Yaoundé"},"geometry":{"coordinates":[11.518786244257939,3.8893403144089405],"type":"Point"}},
-            {"type":"Feature","properties":{"id":2,"name":"Messassi Branch","city":"Yaoundé"},"geometry":{"coordinates":[11.533325791154198,3.904884445540077],"type":"Point"}},
-            {"type":"Feature","properties":{"name":"Eleveur Branch","id":3,"city":"Yaoundé"},"geometry":{"coordinates":[11.546168292914814,3.8881849580807994],"type":"Point"}},
-            {"type":"Feature","properties":{"id":4,"name":"Bonaberi 2 Branch","city":"Douala"},"geometry":{"coordinates":[9.648185673312668,4.096856766408877],"type":"Point"}},
-            {"type":"Feature","properties":{"id":5,"name":"Village Branch","city":"Douala"},"geometry":{"coordinates":[9.752522758220579,4.009033041190264],"type":"Point"}},
-            {"type":"Feature","properties":{"id":6,"name":"New Bell Branch","city":"Douala"},"geometry":{"coordinates":[9.70043055908451,4.030003414260932],"type":"Point"}}
-        ]
-    };
-
-    map.on('load', () => {
-        map.addLayer({
-            id: 'apartments',
-            type: 'symbol',
-            source: {
-                type: 'geojson',
-                data: apartments
-            },
-            layout: {
-                'icon-image': 'marker-15'
-            }
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZXNtYXktOSIsImEiOiJjbHloeGZlYzQwNG9lMmpxMnRoOWpwczRpIn0.8bV8H4pVxNbjvPvkcmNfjQ';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/satellite-streets-v12',
+            center: [12.0, 6.0],
+            zoom: 5
         });
 
-        map.addLayer({
-            id: 'church_builds',
-            type: 'symbol',
-            source: {
-                type: 'geojson',
-                data: church_builds
-            },
-            layout: {
-                'icon-image': 'marker-15'
-            }
+        map.on('load', () => {
+            // Load GeoJSON data for apartments
+            fetch('apartments_cameroon.geojson')
+                .then(response => response.json())
+                .then(data => {
+                    map.addLayer({
+                        id: 'apartments',
+                        type: 'symbol',
+                        source: {
+                            type: 'geojson',
+                            data: data
+                        },
+                        layout: {
+                            'icon-image': 'home-15',
+                            'icon-size': 1.5 // Adjust icon size if needed
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading apartments:', error));
+
+            // Load GeoJSON data for church buildings
+            fetch('church_buildings_cameroon.geojson')
+                .then(response => response.json())
+                .then(data => {
+                    map.addLayer({
+                        id: 'church_buildings',
+                        type: 'symbol',
+                        source: {
+                            type: 'geojson',
+                            data: data
+                        },
+                        layout: {
+                            'icon-image': 'place-of-worship-15',
+                            'icon-size': 1.5 // Adjust icon size if needed
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading church buildings:', error));
         });
 
-        map.addSource('nearest-building', {
-            type: 'geojson',
-            data: {
-                type: 'FeatureCollection',
-                features: []
-            }
-        });
-
-        map.on('mousemove', (event) => {
-            const features = map.queryRenderedFeatures(event.point, {
-                layers: ['apartments', 'church_builds']
-            });
-            if (!features.length) {
-                return;
-            }
-            const feature = features[0];
-
+        map.on('mousemove', 'apartments', (event) => {
+            const apartmentName = event.features[0].properties.name;
             new mapboxgl.Popup()
-                .setLngLat(feature.geometry.coordinates)
-                .setHTML(feature.properties.name)
+                .setLngLat(event.lngLat)
+                .setHTML(`<h3>${name}</h3>`)
                 .addTo(map);
-
-            map.getCanvas().style.cursor = features.length ? 'pointer' : '';
         });
 
-        map.on('click', (event) => {
-            const apartmentFeatures = map.queryRenderedFeatures(event.point, {
-                layers: ['apartments']
-            });
-            if (!apartmentFeatures.length) {
-                return;
-            }
-            const apartmentFeature = apartmentFeatures[0];
+        map.on('mousemove', 'church_buildings', (event) => {
+            const churchName = event.features[0].properties.name;
+            new mapboxgl.Popup()
+                .setLngLat(event.lngLat)
+                .setHTML(`<h3>${name}</h3>`)
+                .addTo(map);
+        });
 
-            const nearestBuilding = turf.nearest(apartmentFeature, church_builds);
-
-            if (nearestBuilding === null) return;
-
+        map.on('click', 'apartments', (event) => {
+            const apartmentFeature = event.features[0];
+            const nearestChurch = turf.nearest(apartmentFeature, map.getSource('church_buildings')._data.features);
+            
             map.getSource('nearest-building').setData({
                 type: 'FeatureCollection',
-                features: [nearestBuilding]
+                features: [nearestChurch]
             });
 
-            if (map.getLayer('nearest-building')) {
-                map.removeLayer('nearest-building');
-            }
-            map.addLayer(
-                {
+            if (!map.getLayer('nearest-building')) {
+                map.addLayer({
                     id: 'nearest-building',
                     type: 'circle',
                     source: 'nearest-building',
@@ -138,11 +106,33 @@
                         'circle-radius': 12,
                         'circle-color': '#486DE0'
                     }
-                },
-                'church_builds'
-            );
+                });
+            }
         });
-    });
+
+        // Add a point on click for church buildings for illustration
+        map.on('click', 'church_buildings', (event) => {
+            new mapboxgl.Popup()
+                .setLngLat(event.lngLat)
+                .setHTML('<h3>Selected Church Building</h3>')
+                .addTo(map);
+        });
+
+        // Change the cursor to a pointer when hovering over both layers
+        map.on('mouseenter', 'apartments', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseenter', 'church_buildings', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to the default when it leaves
+        map.on('mouseleave', 'apartments', () => {
+            map.getCanvas().style.cursor = '';
+        });
+        map.on('mouseleave', 'church_buildings', () => {
+            map.getCanvas().style.cursor = '';
+        });
     </script>
 </body>
 </html>
